@@ -140,6 +140,135 @@
         // The sacred list of names
         let names = [];
 
+        // Encryption utilities - keeping secrets actually secret!
+        // (because base64 is about as secure as wrapping paper)
+
+        /**
+         * Derive an encryption key from a password using PBKDF2
+         * @param {string} password - The password to derive the key from
+         * @returns {Promise<CryptoKey>} - The derived encryption key
+         */
+        async function deriveKey(password) {
+            const algo = {
+                name: 'PBKDF2',
+                hash: 'SHA-256',
+                salt: new TextEncoder().encode('a-unique-salt'),
+                iterations: 1000
+            };
+            return crypto.subtle.deriveKey(
+                algo,
+                await crypto.subtle.importKey(
+                    'raw',
+                    new TextEncoder().encode(password),
+                    { name: algo.name },
+                    false,
+                    ['deriveKey']
+                ),
+                {
+                    name: 'AES-GCM',
+                    length: 256
+                },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        /**
+         * Encrypt text using AES-GCM
+         * @param {string} text - The text to encrypt
+         * @param {string} password - The password for encryption
+         * @returns {Promise<{cipherText: ArrayBuffer, iv: Uint8Array}>}
+         */
+        async function encrypt(text, password) {
+            const algo = {
+                name: 'AES-GCM',
+                length: 256,
+                iv: crypto.getRandomValues(new Uint8Array(12))
+            };
+            return {
+                cipherText: await crypto.subtle.encrypt(
+                    algo,
+                    await deriveKey(password),
+                    new TextEncoder().encode(text)
+                ),
+                iv: algo.iv
+            };
+        }
+
+        /**
+         * Decrypt encrypted data using AES-GCM
+         * @param {Object} encrypted - The encrypted data {cipherText, iv}
+         * @param {string} password - The password for decryption
+         * @returns {Promise<string>} - The decrypted text
+         */
+        async function decrypt(encrypted, password) {
+            const algo = {
+                name: 'AES-GCM',
+                length: 256,
+                iv: encrypted.iv
+            };
+            return new TextDecoder().decode(
+                await crypto.subtle.decrypt(
+                    algo,
+                    await deriveKey(password),
+                    encrypted.cipherText
+                )
+            );
+        }
+
+        /**
+         * Pad a string to a fixed length
+         * This prevents length-based guessing of the encrypted name
+         * @param {string} str - The string to pad
+         * @param {number} length - The target length
+         * @returns {string} - The padded string
+         */
+        function padString(str, length) {
+            if (str.length >= length) return str;
+            return str + ' '.repeat(length - str.length);
+        }
+
+        /**
+         * Convert ArrayBuffer to base64url (URL-safe base64)
+         * @param {ArrayBuffer} buffer - The buffer to convert
+         * @returns {string} - Base64url encoded string
+         */
+        function arrayBufferToBase64Url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+
+        /**
+         * Convert base64url to ArrayBuffer
+         * @param {string} base64url - The base64url string
+         * @returns {ArrayBuffer} - The decoded buffer
+         */
+        function base64UrlToArrayBuffer(base64url) {
+            // Convert base64url to base64
+            let base64 = base64url
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+
+            // Add padding
+            while (base64.length % 4) {
+                base64 += '=';
+            }
+
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
         // Fisher-Yates shuffle - because randomness should be fair
         function shuffleArray(array) {
             const shuffled = [...array];
@@ -249,7 +378,7 @@
         }
 
         // Display the results with link generation
-        function displayResults(allocations) {
+        async function displayResults(allocations) {
             const resultsCard = document.getElementById('resultsCard');
             const resultsList = document.getElementById('resultsList');
             const groupName = document.getElementById('groupNameInput').value.trim() || 'Secret Santa';
@@ -257,9 +386,15 @@
             // Clear previous results
             resultsList.innerHTML = '';
 
+            // Find the maximum name length for padding
+            const maxLength = Math.max(...Object.values(allocations).map(name => name.length));
+            // Add some extra padding for good measure (minimum 50 chars)
+            const paddingLength = Math.max(50, maxLength + 10);
+
             // Create elements for each allocation
-            Object.entries(allocations).forEach(([giver, receiver]) => {
-                const link = generateAssignmentLink(groupName, giver, receiver);
+            for (const [giver, receiver] of Object.entries(allocations)) {
+                // Generate encrypted link (this is async, so we await it)
+                const link = await generateAssignmentLink(groupName, giver, receiver, paddingLength);
 
                 const resultItem = document.createElement('div');
                 resultItem.className = 'result-item';
@@ -280,19 +415,33 @@
                 container.appendChild(button);
                 resultItem.appendChild(container);
                 resultsList.appendChild(resultItem);
-            });
+            }
 
             resultsCard.classList.remove('hidden');
             resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // Generate a shareable link for an assignment
-        function generateAssignmentLink(groupName, name, assignment) {
-            // Base64 encode the assignment to keep it hidden in the URL
-            const encodedAssignment = btoa(assignment);
+        /**
+         * Generate a shareable link for an assignment with encryption
+         * @param {string} groupName - The group name (used as encryption password)
+         * @param {string} name - The participant's name
+         * @param {string} assignment - The assigned recipient
+         * @param {number} paddingLength - Length to pad assignment to
+         * @returns {Promise<string>} - The encrypted link
+         */
+        async function generateAssignmentLink(groupName, name, assignment, paddingLength) {
+            // Pad the assignment to prevent length-based guessing
+            const paddedAssignment = padString(assignment, paddingLength);
+
+            // Encrypt the assignment using the group name as the password
+            const encrypted = await encrypt(paddedAssignment, groupName);
+
+            // Convert encrypted data to URL-safe base64
+            const encryptedData = arrayBufferToBase64Url(encrypted.cipherText);
+            const ivData = arrayBufferToBase64Url(encrypted.iv);
 
             // Use hash parameters for privacy (not logged by servers)
-            return `${location.origin}/view.html#group=${encodeURIComponent(groupName)}&name=${encodeURIComponent(name)}&assignment=${encodeURIComponent(encodedAssignment)}`;
+            return `${location.origin}/view.html#group=${encodeURIComponent(groupName)}&name=${encodeURIComponent(name)}&data=${encodeURIComponent(encryptedData)}&iv=${encodeURIComponent(ivData)}`;
         }
 
         // Copy link to clipboard
