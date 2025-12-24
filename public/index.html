@@ -37,6 +37,19 @@
 
         <!-- Main Card -->
         <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
+            <!-- Group Name Section -->
+            <div class="mb-8">
+                <label for="groupNameInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Group Name
+                </label>
+                <input
+                    type="text"
+                    id="groupNameInput"
+                    placeholder="e.g., Office Party 2025"
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                >
+            </div>
+
             <!-- Add Name Section -->
             <div class="mb-8">
                 <label for="nameInput" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -94,7 +107,7 @@
                     🎁 Secret Santa Assignments
                 </h2>
                 <p class="text-gray-600">
-                    Click on a name to reveal who they're buying for!
+                    Share these links with each participant - they'll see only their assignment!
                 </p>
             </div>
             <div id="resultsList" class="space-y-3">
@@ -228,37 +241,72 @@
             displayResults(allocations);
         }
 
-        // Display the results with reveal functionality
+        // Display the results with link generation
         function displayResults(allocations) {
             const resultsCard = document.getElementById('resultsCard');
             const resultsList = document.getElementById('resultsList');
+            const groupName = document.getElementById('groupNameInput').value.trim() || 'Secret Santa';
 
-            resultsList.innerHTML = Object.entries(allocations).map(([giver, receiver]) => `
-                <div class="result-item">
-                    <button
-                        onclick="toggleReveal(this)"
-                        class="w-full text-left p-4 bg-gradient-to-r from-red-100 to-green-100 hover:from-red-200 hover:to-green-200 rounded-lg transition-all border-2 border-gray-200"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-gray-800">${escapeHtml(giver)}</span>
-                            <span class="text-sm text-gray-600">Click to reveal →</span>
-                        </div>
-                        <div class="receiver hidden mt-2 pt-2 border-t border-gray-300">
-                            <span class="text-gray-700">is buying for...</span>
-                            <span class="font-bold text-green-700 ml-2">🎁 ${escapeHtml(receiver)}</span>
-                        </div>
-                    </button>
-                </div>
-            `).join('');
+            // Clear previous results
+            resultsList.innerHTML = '';
+
+            // Create elements for each allocation
+            Object.entries(allocations).forEach(([giver, receiver]) => {
+                const link = generateAssignmentLink(groupName, giver, receiver);
+
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+
+                const container = document.createElement('div');
+                container.className = 'flex items-center gap-2 p-4 bg-gradient-to-r from-red-100 to-green-100 rounded-lg border-2 border-gray-200';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'flex-1 font-bold text-gray-800';
+                nameSpan.textContent = giver;
+
+                const button = document.createElement('button');
+                button.className = 'px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded transition-colors';
+                button.textContent = '📋 Click to copy link';
+                button.onclick = () => copyLink(link, button);
+
+                container.appendChild(nameSpan);
+                container.appendChild(button);
+                resultItem.appendChild(container);
+                resultsList.appendChild(resultItem);
+            });
 
             resultsCard.classList.remove('hidden');
             resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // Toggle reveal of an assignment
-        function toggleReveal(button) {
-            const receiver = button.querySelector('.receiver');
-            receiver.classList.toggle('hidden');
+        // Generate a shareable link for an assignment
+        function generateAssignmentLink(groupName, name, assignment) {
+            // Base64 encode the assignment to keep it hidden in the URL
+            const encodedAssignment = btoa(assignment);
+
+            // Use hash parameters for privacy (not logged by servers)
+            return `${location.origin}/view.html#group=${encodeURIComponent(groupName)}&name=${encodeURIComponent(name)}&assignment=${encodeURIComponent(encodedAssignment)}`;
+        }
+
+        // Copy link to clipboard
+        async function copyLink(link, button) {
+            try {
+                await navigator.clipboard.writeText(link);
+
+                // Visual feedback - change button text temporarily
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copied!';
+                button.classList.add('bg-green-500', 'hover:bg-green-600');
+                button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }, 2000);
+            } catch (err) {
+                alert('Oops! Failed to copy the link. Please try again! 🎅');
+            }
         }
 
         // Reset the app to start over
