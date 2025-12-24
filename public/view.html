@@ -23,28 +23,42 @@
         @keyframes dramaticReveal {
             0% {
                 opacity: 0;
-                transform: scale(0.5) rotateY(-90deg);
+                transform: scale(0.5) rotateY(0deg);
                 filter: blur(10px);
             }
             50% {
                 opacity: 0.5;
-                transform: scale(1.2) rotateY(0deg);
+                transform: scale(1.2) rotateY(180deg);
                 filter: blur(5px);
             }
             100% {
                 opacity: 1;
-                transform: scale(1) rotateY(0deg);
+                transform: scale(1) rotateY(360deg);
                 filter: blur(0);
             }
         }
         .dramatic-reveal {
-            animation: dramaticReveal 1s ease-out forwards;
+            animation: dramaticReveal 1.5s ease-out forwards;
         }
         .hidden-assignment {
-            opacity: 0;
             filter: blur(20px);
             cursor: pointer;
             user-select: none;
+        }
+        /* Confetti styles */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 9999;
+            animation: confetti-fall 3s linear forwards;
+        }
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         /* Dark mode support */
@@ -252,6 +266,25 @@
             return div.innerHTML;
         }
 
+        // Create confetti burst
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff69b4'];
+            const confettiCount = 50;
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(confetti);
+
+                // Remove confetti after animation
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
         // Reveal the assignment with dramatic animation
         function revealAssignment() {
             const assignedPersonElement = document.getElementById('assignedPerson');
@@ -265,6 +298,9 @@
 
             // Update the text to show the actual name
             assignedPersonElement.textContent = actualAssignment;
+
+            // Create confetti burst
+            createConfetti();
         }
 
         // Display the assignment
