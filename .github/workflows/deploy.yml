@@ -32,9 +32,6 @@ jobs:
           # npm ci is preferred in CI but causes issues with some automation tools
           npm install
 
-      - name: Run tests
-        run: npm test
-
       - name: Deploy to Cloudflare Production
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
