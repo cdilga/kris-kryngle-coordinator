@@ -269,9 +269,9 @@
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff69b4'];
             const confettiCount = 50;
 
-            // Get the position of the 🎁 emoji (the sparkle element)
-            const sparkleElement = document.querySelector('#assignmentDisplay .sparkle');
-            const rect = sparkleElement.getBoundingClientRect();
+            // Get the position of the assignment element (the present)
+            const assignedPersonElement = document.getElementById('assignedPerson');
+            const rect = assignedPersonElement.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
 
