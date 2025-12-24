@@ -4,14 +4,6 @@ compatibility_date = "2024-12-20"
 # Pages configuration
 pages_build_output_dir = "public"
 
-# Production deployment
-[env.production]
-name = "kris-kryngle-coordinator"
-vars = { ENVIRONMENT = "production" }
-routes = [
-  { pattern = "kris-kryngle-coordinator.dilger.dev/*", zone_name = "dilger.dev" }
-]
-
 # Uncomment to use KV namespaces
 # [[kv_namespaces]]
 # binding = "MY_KV"
