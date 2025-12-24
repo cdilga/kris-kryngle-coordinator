@@ -39,7 +39,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           # Deploy to production environment
-          DEPLOY_OUTPUT=$(wrangler deploy --env production 2>&1 | tee /dev/stderr)
+          DEPLOY_OUTPUT=$(wrangler pages deploy --env production 2>&1 | tee /dev/stderr)
           echo "DEPLOY_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$DEPLOY_OUTPUT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -101,7 +101,7 @@ jobs:
         run: |
           # Deploy with PR-specific name
           PR_NAME="${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
-          DEPLOY_OUTPUT=$(wrangler deploy --name "pr-${PR_NAME}-${{ github.event.pull_request.number }}" 2>&1 | tee /dev/stderr)
+          DEPLOY_OUTPUT=$(wrangler pages deploy --name "pr-${PR_NAME}-${{ github.event.pull_request.number }}" 2>&1 | tee /dev/stderr)
           echo "DEPLOY_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$DEPLOY_OUTPUT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
