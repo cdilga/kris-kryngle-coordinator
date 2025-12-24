@@ -23,28 +23,40 @@
         @keyframes dramaticReveal {
             0% {
                 opacity: 0;
-                transform: scale(0.5) rotateY(-90deg);
+                transform: scale(0.5) rotateY(0deg);
                 filter: blur(10px);
             }
             50% {
                 opacity: 0.5;
-                transform: scale(1.2) rotateY(0deg);
+                transform: scale(1.2) rotateY(180deg);
                 filter: blur(5px);
             }
             100% {
                 opacity: 1;
-                transform: scale(1) rotateY(0deg);
+                transform: scale(1) rotateY(360deg);
                 filter: blur(0);
             }
         }
         .dramatic-reveal {
-            animation: dramaticReveal 1s ease-out forwards;
+            animation: dramaticReveal 1.5s ease-out forwards;
         }
         .hidden-assignment {
-            opacity: 0;
-            filter: blur(20px);
             cursor: pointer;
             user-select: none;
+        }
+        /* Confetti styles */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        @keyframes confetti-burst {
+            to {
+                transform: translate(var(--tx), var(--ty)) rotate(720deg);
+                opacity: 0;
+            }
         }
 
         /* Dark mode support */
@@ -252,6 +264,44 @@
             return div.innerHTML;
         }
 
+        // Create confetti burst from the present position
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff69b4'];
+            const confettiCount = 50;
+
+            // Get the position of the assignment element (the present)
+            const assignedPersonElement = document.getElementById('assignedPerson');
+            const rect = assignedPersonElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+
+                // Position confetti at the center of the present
+                confetti.style.left = centerX + 'px';
+                confetti.style.top = centerY + 'px';
+
+                // Random direction and distance for burst effect
+                const angle = (Math.PI * 2 * i) / confettiCount;
+                const velocity = 150 + Math.random() * 300;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity + Math.random() * 200; // Extra downward bias
+
+                confetti.style.setProperty('--tx', tx + 'px');
+                confetti.style.setProperty('--ty', ty + 'px');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animation = `confetti-burst ${1.5 + Math.random()}s ease-out forwards`;
+                confetti.style.animationDelay = Math.random() * 0.1 + 's';
+
+                document.body.appendChild(confetti);
+
+                // Remove confetti after animation
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
         // Reveal the assignment with dramatic animation
         function revealAssignment() {
             const assignedPersonElement = document.getElementById('assignedPerson');
@@ -265,6 +315,9 @@
 
             // Update the text to show the actual name
             assignedPersonElement.textContent = actualAssignment;
+
+            // Create confetti burst
+            createConfetti();
         }
 
         // Display the assignment
