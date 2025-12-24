@@ -39,18 +39,18 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           # Deploy to production environment
-          DEPLOY_OUTPUT=$(wrangler pages deploy --env production 2>&1 | tee /dev/stderr)
+          DEPLOY_OUTPUT=$(wrangler pages deploy public --project-name kris-kryngle-coordinator --branch main 2>&1 | tee /dev/stderr)
           echo "DEPLOY_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$DEPLOY_OUTPUT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          # Extract deployment URL (workers.dev URL)
-          DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
+          # Extract deployment URL (pages.dev URL)
+          DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.pages\.dev' | head -1)
 
           # Also try to extract custom domain URL
           CUSTOM_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.dilger\.dev' | head -1)
 
-          # Prefer custom domain if available, otherwise use workers.dev
+          # Prefer custom domain if available, otherwise use pages.dev
           if [ -n "$CUSTOM_URL" ]; then
             DEPLOY_URL="$CUSTOM_URL"
           elif [ -z "$DEPLOY_URL" ]; then
@@ -73,7 +73,7 @@ jobs:
 
             let urlInfo = `📍 **URL**: ${deployUrl}`;
             if (customUrl && customUrl !== deployUrl) {
-              urlInfo = `📍 **URLs**:\n- Production Domain: ${customUrl}\n- Workers.dev: ${deployUrl}`;
+              urlInfo = `📍 **URLs**:\n- Production Domain: ${customUrl}\n- Pages.dev: ${deployUrl}`;
             }
 
             // Find the most recent commit's associated PR
@@ -99,17 +99,17 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # Deploy with PR-specific name
+          # Deploy with PR-specific branch name
           PR_NAME="${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
-          DEPLOY_OUTPUT=$(wrangler pages deploy --name "pr-${PR_NAME}-${{ github.event.pull_request.number }}" 2>&1 | tee /dev/stderr)
+          DEPLOY_OUTPUT=$(wrangler pages deploy public --project-name kris-kryngle-coordinator --branch "pr-${PR_NAME}-${{ github.event.pull_request.number }}" --commit-hash "${{ github.event.pull_request.head.sha }}" 2>&1 | tee /dev/stderr)
           echo "DEPLOY_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$DEPLOY_OUTPUT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
           # Extract preview URL
-          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
+          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.pages\.dev' | head -1)
           if [ -z "$PREVIEW_URL" ]; then
-            PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+' | grep '\.workers\.dev' | head -1)
+            PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+' | grep '\.pages\.dev' | head -1)
           fi
           echo "PREVIEW_URL=$PREVIEW_URL" >> $GITHUB_ENV
           echo "✅ Preview deployed to: $PREVIEW_URL"
