@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Pages App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .app {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            padding: 2rem;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        
+        .status {
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .features {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .features h2 {
+            color: #4b5563;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+        
+        .features ul {
+            list-style: none;
+        }
+        
+        .features li {
+            padding: 0.5rem 0;
+            color: #6b7280;
+        }
+        
+        .features li:before {
+            content: "✨ ";
+            color: #6366f1;
+        }
+        
+        .api-test {
+            margin-top: 2rem;
+        }
+        
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #5558e3;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        #api-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            display: none;
+            word-wrap: break-word;
+        }
+        
+        #api-result.show {
+            display: block;
+        }
+        
+        .footer {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .footer a {
+            color: #6366f1;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1>🚀 Cloudflare Pages</h1>
+        <div class="status">✅ Deployed Successfully</div>
+        
+        <p>Your Cloudflare Pages application is live! This template includes both static hosting and serverless functions.</p>
+        
+        <div class="features">
+            <h2>Features</h2>
+            <ul>
+                <li>Static site hosting at the edge</li>
+                <li>Serverless functions with Pages Functions</li>
+                <li>Automatic deployments from GitHub</li>
+                <li>Preview deployments for pull requests</li>
+                <li>Built-in analytics and performance monitoring</li>
+            </ul>
+        </div>
+        
+        <div class="api-test">
+            <h3 style="margin-bottom: 1rem;">Test API Endpoint</h3>
+            <button onclick="testApi()">Call /api/hello</button>
+            <div id="api-result"></div>
+        </div>
+        
+        <div class="footer">
+            <p>Created with 🤖 Claude using <a href="https://github.com/cdilga/the-ultimate-bootstrap" target="_blank">the-ultimate-bootstrap</a></p>
+            <p style="margin-top: 0.5rem;">Powered by <a href="https://pages.cloudflare.com" target="_blank">Cloudflare Pages</a></p>
+        </div>
+    </div>
+    
+    <script>
+        async function testApi() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.textContent = 'Loading...';
+            resultDiv.classList.add('show');
+            
+            try {
+                const response = await fetch('/api/hello');
+                const data = await response.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
