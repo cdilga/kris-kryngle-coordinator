@@ -127,6 +127,76 @@
         // Store the assignment name for the reveal
         let actualAssignment = '';
 
+        // Encryption utilities (matching those in index.html)
+
+        /**
+         * Derive an encryption key from a password using PBKDF2
+         */
+        async function deriveKey(password) {
+            const algo = {
+                name: 'PBKDF2',
+                hash: 'SHA-256',
+                salt: new TextEncoder().encode('a-unique-salt'),
+                iterations: 1000
+            };
+            return crypto.subtle.deriveKey(
+                algo,
+                await crypto.subtle.importKey(
+                    'raw',
+                    new TextEncoder().encode(password),
+                    { name: algo.name },
+                    false,
+                    ['deriveKey']
+                ),
+                {
+                    name: 'AES-GCM',
+                    length: 256
+                },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        /**
+         * Decrypt encrypted data using AES-GCM
+         */
+        async function decrypt(encrypted, password) {
+            const algo = {
+                name: 'AES-GCM',
+                length: 256,
+                iv: encrypted.iv
+            };
+            return new TextDecoder().decode(
+                await crypto.subtle.decrypt(
+                    algo,
+                    await deriveKey(password),
+                    encrypted.cipherText
+                )
+            );
+        }
+
+        /**
+         * Convert base64url to ArrayBuffer
+         */
+        function base64UrlToArrayBuffer(base64url) {
+            // Convert base64url to base64
+            let base64 = base64url
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+
+            // Add padding
+            while (base64.length % 4) {
+                base64 += '=';
+            }
+
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
         // Parse the hash parameters
         function parseHashParams() {
             const hash = window.location.hash.substring(1); // Remove the '#'
@@ -135,14 +205,41 @@
             return {
                 group: params.get('group'),
                 name: params.get('name'),
+                data: params.get('data'),
+                iv: params.get('iv'),
+                // Support old base64-encoded links for backwards compatibility
                 assignment: params.get('assignment')
             };
         }
 
-        // Decode the base64 encoded assignment
-        function decodeAssignment(encoded) {
+        /**
+         * Decode and decrypt the assignment
+         * @param {Object} params - The URL parameters
+         * @returns {Promise<string>} - The decrypted assignment
+         */
+        async function decodeAssignment(params) {
             try {
-                return atob(encoded);
+                // Check if this is an old base64-encoded link
+                if (params.assignment && !params.data) {
+                    // Old format: just decode base64
+                    return atob(params.assignment);
+                }
+
+                // New format: decrypt using AES-GCM
+                if (!params.data || !params.iv || !params.group) {
+                    throw new Error('Missing encryption data');
+                }
+
+                const cipherText = base64UrlToArrayBuffer(params.data);
+                const iv = new Uint8Array(base64UrlToArrayBuffer(params.iv));
+
+                const decrypted = await decrypt(
+                    { cipherText, iv },
+                    params.group
+                );
+
+                // Trim padding (spaces were added to make all encrypted names the same length)
+                return decrypted.trim();
             } catch (e) {
                 throw new Error('Invalid assignment encoding');
             }
@@ -171,7 +268,7 @@
         }
 
         // Display the assignment
-        function displayAssignment() {
+        async function displayAssignment() {
             const loadingState = document.getElementById('loadingState');
             const errorState = document.getElementById('errorState');
             const assignmentDisplay = document.getElementById('assignmentDisplay');
@@ -181,12 +278,13 @@
                 const params = parseHashParams();
 
                 // Validate that we have all required parameters
-                if (!params.group || !params.name || !params.assignment) {
+                // Support both old format (assignment) and new format (data + iv)
+                if (!params.group || !params.name || (!params.assignment && (!params.data || !params.iv))) {
                     throw new Error('Missing required parameters');
                 }
 
-                // Decode the assignment
-                actualAssignment = decodeAssignment(params.assignment);
+                // Decode the assignment (now async because it might need decryption)
+                actualAssignment = await decodeAssignment(params);
 
                 // Update the display with the assignment info
                 document.getElementById('groupName').textContent = params.group;
