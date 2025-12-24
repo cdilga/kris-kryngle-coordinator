@@ -41,7 +41,6 @@
             animation: dramaticReveal 1.5s ease-out forwards;
         }
         .hidden-assignment {
-            filter: blur(20px);
             cursor: pointer;
             user-select: none;
         }
@@ -50,13 +49,12 @@
             position: fixed;
             width: 10px;
             height: 10px;
-            top: -10px;
             z-index: 9999;
-            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
         }
-        @keyframes confetti-fall {
+        @keyframes confetti-burst {
             to {
-                transform: translateY(100vh) rotate(360deg);
+                transform: translate(var(--tx), var(--ty)) rotate(720deg);
                 opacity: 0;
             }
         }
@@ -266,22 +264,41 @@
             return div.innerHTML;
         }
 
-        // Create confetti burst
+        // Create confetti burst from the present position
         function createConfetti() {
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff69b4'];
             const confettiCount = 50;
 
+            // Get the position of the assignment element (the present)
+            const assignedPersonElement = document.getElementById('assignedPerson');
+            const rect = assignedPersonElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
             for (let i = 0; i < confettiCount; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + '%';
+
+                // Position confetti at the center of the present
+                confetti.style.left = centerX + 'px';
+                confetti.style.top = centerY + 'px';
+
+                // Random direction and distance for burst effect
+                const angle = (Math.PI * 2 * i) / confettiCount;
+                const velocity = 150 + Math.random() * 300;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity + Math.random() * 200; // Extra downward bias
+
+                confetti.style.setProperty('--tx', tx + 'px');
+                confetti.style.setProperty('--ty', ty + 'px');
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.animationDelay = Math.random() * 0.5 + 's';
-                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animation = `confetti-burst ${1.5 + Math.random()}s ease-out forwards`;
+                confetti.style.animationDelay = Math.random() * 0.1 + 's';
+
                 document.body.appendChild(confetti);
 
                 // Remove confetti after animation
-                setTimeout(() => confetti.remove(), 5000);
+                setTimeout(() => confetti.remove(), 3000);
             }
         }
 
