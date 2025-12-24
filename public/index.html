@@ -3,177 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloudflare Pages App</title>
+    <title>Kris Kringle Coordinator 🎅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
         }
-        
-        .app {
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            padding: 2rem;
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 2rem;
-        }
-        
-        .status {
-            background: #10b981;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            display: inline-block;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-        }
-        
-        .features {
-            background: #f9fafb;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-        }
-        
-        .features h2 {
-            color: #4b5563;
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
-        }
-        
-        .features ul {
-            list-style: none;
-        }
-        
-        .features li {
-            padding: 0.5rem 0;
-            color: #6b7280;
-        }
-        
-        .features li:before {
-            content: "✨ ";
-            color: #6366f1;
-        }
-        
-        .api-test {
-            margin-top: 2rem;
-        }
-        
-        button {
-            background: #6366f1;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        button:hover {
-            background: #5558e3;
-        }
-        
-        button:active {
-            transform: scale(0.98);
-        }
-        
-        #api-result {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #f3f4f6;
-            border-radius: 0.5rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-            display: none;
-            word-wrap: break-word;
-        }
-        
-        #api-result.show {
-            display: block;
-        }
-        
-        .footer {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e5e7eb;
-            text-align: center;
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-        
-        .footer a {
-            color: #6366f1;
-            text-decoration: none;
-        }
-        
-        .footer a:hover {
-            text-decoration: underline;
+        .shake {
+            animation: shake 0.3s ease-in-out;
         }
     </style>
 </head>
-<body>
-    <div class="app">
-        <h1>🚀 Cloudflare Pages</h1>
-        <div class="status">✅ Deployed Successfully</div>
-        
-        <p>Your Cloudflare Pages application is live! This template includes both static hosting and serverless functions.</p>
-        
-        <div class="features">
-            <h2>Features</h2>
-            <ul>
-                <li>Static site hosting at the edge</li>
-                <li>Serverless functions with Pages Functions</li>
-                <li>Automatic deployments from GitHub</li>
-                <li>Preview deployments for pull requests</li>
-                <li>Built-in analytics and performance monitoring</li>
-            </ul>
+<body class="bg-gradient-to-br from-red-50 via-green-50 to-blue-50 min-h-screen py-8 px-4">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
+                🎅 Kris Kringle Coordinator
+            </h1>
+            <p class="text-gray-600">
+                Randomly assign gift-givers for your holiday celebration!
+            </p>
         </div>
-        
-        <div class="api-test">
-            <h3 style="margin-bottom: 1rem;">Test API Endpoint</h3>
-            <button onclick="testApi()">Call /api/hello</button>
-            <div id="api-result"></div>
+
+        <!-- Main Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
+            <!-- Add Name Section -->
+            <div class="mb-8">
+                <label for="nameInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Add Participant
+                </label>
+                <div class="flex gap-2">
+                    <input
+                        type="text"
+                        id="nameInput"
+                        placeholder="Enter a name..."
+                        class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <button
+                        onclick="addName()"
+                        class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+                    >
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <!-- Names List -->
+            <div class="mb-8">
+                <h2 class="text-sm font-semibold text-gray-700 mb-3">
+                    Participants (<span id="nameCount">0</span>)
+                </h2>
+                <div id="namesList" class="space-y-2 min-h-[100px]">
+                    <p class="text-gray-400 text-center py-8">
+                        No participants yet. Add some names to get started!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pretzel Button -->
+            <div class="text-center">
+                <button
+                    id="pretzelButton"
+                    onclick="generateAllocations()"
+                    disabled
+                    class="px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold text-lg rounded-lg transition-all disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 shadow-lg"
+                >
+                    🥨 Pretzel
+                </button>
+                <p class="text-xs text-gray-500 mt-2">
+                    (Minimum 2 participants required)
+                </p>
+            </div>
         </div>
-        
-        <div class="footer">
-            <p>Created with 🤖 Claude using <a href="https://github.com/cdilga/the-ultimate-bootstrap" target="_blank">the-ultimate-bootstrap</a></p>
-            <p style="margin-top: 0.5rem;">Powered by <a href="https://pages.cloudflare.com" target="_blank">Cloudflare Pages</a></p>
+
+        <!-- Results Card -->
+        <div id="resultsCard" class="bg-white rounded-2xl shadow-xl p-6 md:p-8 hidden fade-in">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                    🎁 Secret Santa Assignments
+                </h2>
+                <p class="text-gray-600">
+                    Click on a name to reveal who they're buying for!
+                </p>
+            </div>
+            <div id="resultsList" class="space-y-3">
+                <!-- Results will be inserted here -->
+            </div>
+            <div class="text-center mt-6">
+                <button
+                    onclick="resetApp()"
+                    class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
+                >
+                    Start Over
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>✨ All processing happens in your browser - nothing is stored or sent to a server</p>
         </div>
     </div>
-    
+
     <script>
-        async function testApi() {
-            const resultDiv = document.getElementById('api-result');
-            resultDiv.textContent = 'Loading...';
-            resultDiv.classList.add('show');
-            
-            try {
-                const response = await fetch('/api/hello');
-                const data = await response.json();
-                resultDiv.textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                resultDiv.textContent = 'Error: ' + error.message;
+        // The sacred list of names
+        let names = [];
+
+        // Fisher-Yates shuffle - because randomness should be fair
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Create allocations using the specified derangement algorithm
+        function createAllocations(namesList) {
+            // Shuffle the list to randomize who gets whom
+            const shuffled = shuffleArray(namesList);
+
+            // Create allocations: shuffled[i] → shuffled[(i + 1) % length]
+            // This ensures everyone gives to someone and no one gives to themselves
+            const allocations = {};
+            for (let i = 0; i < shuffled.length; i++) {
+                const giver = shuffled[i];
+                const receiver = shuffled[(i + 1) % shuffled.length];
+                allocations[giver] = receiver;
+            }
+
+            return allocations;
+        }
+
+        // Handle Enter key in the input field
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                addName();
             }
         }
+
+        // Add a name to the list
+        function addName() {
+            const input = document.getElementById('nameInput');
+            const name = input.value.trim();
+
+            if (!name) {
+                // Gentle shake to say "hey, you forgot something!"
+                input.classList.add('shake');
+                setTimeout(() => input.classList.remove('shake'), 300);
+                return;
+            }
+
+            if (names.includes(name)) {
+                alert(`Oops! "${name}" is already in the list. Everyone's unique here! ✨`);
+                return;
+            }
+
+            names.push(name);
+            input.value = '';
+            input.focus();
+            updateNamesList();
+        }
+
+        // Remove a name from the list
+        function removeName(name) {
+            names = names.filter(n => n !== name);
+            updateNamesList();
+        }
+
+        // Update the displayed list of names
+        function updateNamesList() {
+            const namesList = document.getElementById('namesList');
+            const nameCount = document.getElementById('nameCount');
+            const pretzelButton = document.getElementById('pretzelButton');
+
+            nameCount.textContent = names.length;
+
+            if (names.length === 0) {
+                namesList.innerHTML = `
+                    <p class="text-gray-400 text-center py-8">
+                        No participants yet. Add some names to get started!
+                    </p>
+                `;
+                pretzelButton.disabled = true;
+            } else {
+                namesList.innerHTML = names.map((name, index) => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors fade-in">
+                        <span class="text-gray-800 font-medium">${escapeHtml(name)}</span>
+                        <button
+                            onclick="removeName('${escapeHtml(name)}')"
+                            class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded transition-colors"
+                            aria-label="Remove ${escapeHtml(name)}"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                `).join('');
+
+                // Enable the Pretzel button if we have at least 2 people
+                pretzelButton.disabled = names.length < 2;
+            }
+        }
+
+        // Generate and display the allocations
+        function generateAllocations() {
+            if (names.length < 2) {
+                alert("You need at least 2 participants to make assignments! 🎅");
+                return;
+            }
+
+            const allocations = createAllocations(names);
+            displayResults(allocations);
+        }
+
+        // Display the results with reveal functionality
+        function displayResults(allocations) {
+            const resultsCard = document.getElementById('resultsCard');
+            const resultsList = document.getElementById('resultsList');
+
+            resultsList.innerHTML = Object.entries(allocations).map(([giver, receiver]) => `
+                <div class="result-item">
+                    <button
+                        onclick="toggleReveal(this)"
+                        class="w-full text-left p-4 bg-gradient-to-r from-red-100 to-green-100 hover:from-red-200 hover:to-green-200 rounded-lg transition-all border-2 border-gray-200"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-gray-800">${escapeHtml(giver)}</span>
+                            <span class="text-sm text-gray-600">Click to reveal →</span>
+                        </div>
+                        <div class="receiver hidden mt-2 pt-2 border-t border-gray-300">
+                            <span class="text-gray-700">is buying for...</span>
+                            <span class="font-bold text-green-700 ml-2">🎁 ${escapeHtml(receiver)}</span>
+                        </div>
+                    </button>
+                </div>
+            `).join('');
+
+            resultsCard.classList.remove('hidden');
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Toggle reveal of an assignment
+        function toggleReveal(button) {
+            const receiver = button.querySelector('.receiver');
+            receiver.classList.toggle('hidden');
+        }
+
+        // Reset the app to start over
+        function resetApp() {
+            if (confirm("Are you sure you want to start over? This will clear all participants and assignments.")) {
+                names = [];
+                updateNamesList();
+                document.getElementById('resultsCard').classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Escape HTML to prevent XSS (security is no joke, even at Christmas!)
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize the app
+        updateNamesList();
     </script>
 </body>
 </html>
