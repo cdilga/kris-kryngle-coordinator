@@ -21,38 +21,45 @@
         .shake {
             animation: shake 0.3s ease-in-out;
         }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(to bottom right, rgb(15, 23, 42), rgb(17, 24, 39), rgb(15, 23, 42));
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-red-50 via-green-50 to-blue-50 min-h-screen py-8 px-4">
+<body class="bg-gradient-to-br from-red-50 via-green-50 to-blue-50 dark:bg-gradient-to-br dark:from-slate-900 dark:via-gray-900 dark:to-slate-900 min-h-screen py-8 px-4">
     <div class="max-w-2xl mx-auto">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 🎅 Kris Kringle Coordinator
             </h1>
-            <p class="text-gray-600">
+            <p class="text-gray-600 dark:text-gray-300">
                 Randomly assign gift-givers for your holiday celebration!
             </p>
         </div>
 
         <!-- Main Card -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 mb-6">
             <!-- Group Name Section -->
             <div class="mb-8">
-                <label for="groupNameInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label for="groupNameInput" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Group Name
                 </label>
                 <input
                     type="text"
                     id="groupNameInput"
                     placeholder="e.g., Office Party 2025"
-                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                    class="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
                 >
             </div>
 
             <!-- Add Name Section -->
             <div class="mb-8">
-                <label for="nameInput" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label for="nameInput" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Add Participant
                 </label>
                 <div class="flex gap-2">
@@ -60,12 +67,12 @@
                         type="text"
                         id="nameInput"
                         placeholder="Enter a name..."
-                        class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                        class="flex-1 min-w-0 px-4 py-2 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
                         onkeypress="handleKeyPress(event)"
                     >
                     <button
                         onclick="addName()"
-                        class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+                        class="px-4 sm:px-6 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors whitespace-nowrap"
                     >
                         Add
                     </button>
@@ -74,7 +81,7 @@
 
             <!-- Names List -->
             <div class="mb-8">
-                <h2 class="text-sm font-semibold text-gray-700 mb-3">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     Participants (<span id="nameCount">0</span>)
                 </h2>
                 <div id="namesList" class="space-y-2 min-h-[100px]">
@@ -90,23 +97,23 @@
                     id="pretzelButton"
                     onclick="generateAllocations()"
                     disabled
-                    class="px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold text-lg rounded-lg transition-all disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 shadow-lg"
+                    class="px-8 py-4 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-bold text-lg rounded-lg transition-all disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed disabled:hover:bg-gray-300 dark:disabled:hover:bg-gray-600 shadow-lg"
                 >
                     🥨 Pretzel
                 </button>
-                <p class="text-xs text-gray-500 mt-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     (Minimum 2 participants required)
                 </p>
             </div>
         </div>
 
         <!-- Results Card -->
-        <div id="resultsCard" class="bg-white rounded-2xl shadow-xl p-6 md:p-8 hidden fade-in">
+        <div id="resultsCard" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 hidden fade-in">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                     🎁 Secret Santa Assignments
                 </h2>
-                <p class="text-gray-600">
+                <p class="text-gray-600 dark:text-gray-300">
                     Share these links with each participant - they'll see only their assignment!
                 </p>
             </div>
@@ -116,7 +123,7 @@
             <div class="text-center mt-6">
                 <button
                     onclick="resetApp()"
-                    class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
+                    class="px-6 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
                 >
                     Start Over
                 </button>
@@ -124,7 +131,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-8 text-gray-500 text-sm">
+        <div class="text-center mt-8 text-gray-500 dark:text-gray-400 text-sm">
             <p>✨ All processing happens in your browser - nothing is stored or sent to a server</p>
         </div>
     </div>
@@ -206,18 +213,18 @@
 
             if (names.length === 0) {
                 namesList.innerHTML = `
-                    <p class="text-gray-400 text-center py-8">
+                    <p class="text-gray-400 dark:text-gray-500 text-center py-8">
                         No participants yet. Add some names to get started!
                     </p>
                 `;
                 pretzelButton.disabled = true;
             } else {
                 namesList.innerHTML = names.map((name, index) => `
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors fade-in">
-                        <span class="text-gray-800 font-medium">${escapeHtml(name)}</span>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors fade-in">
+                        <span class="text-gray-800 dark:text-gray-100 font-medium">${escapeHtml(name)}</span>
                         <button
                             onclick="removeName('${escapeHtml(name)}')"
-                            class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded transition-colors"
+                            class="px-3 py-1 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white text-sm font-semibold rounded transition-colors"
                             aria-label="Remove ${escapeHtml(name)}"
                         >
                             Delete
@@ -258,14 +265,14 @@
                 resultItem.className = 'result-item';
 
                 const container = document.createElement('div');
-                container.className = 'flex items-center gap-2 p-4 bg-gradient-to-r from-red-100 to-green-100 rounded-lg border-2 border-gray-200';
+                container.className = 'flex items-center gap-2 p-4 bg-gradient-to-r from-red-100 to-green-100 dark:from-red-900/30 dark:to-green-900/30 rounded-lg border-2 border-gray-200 dark:border-gray-600';
 
                 const nameSpan = document.createElement('span');
-                nameSpan.className = 'flex-1 font-bold text-gray-800';
+                nameSpan.className = 'flex-1 font-bold text-gray-800 dark:text-gray-100';
                 nameSpan.textContent = giver;
 
                 const button = document.createElement('button');
-                button.className = 'px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded transition-colors';
+                button.className = 'px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold rounded transition-colors';
                 button.textContent = '📋 Click to copy link';
                 button.onclick = () => copyLink(link, button);
 
